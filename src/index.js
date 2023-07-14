@@ -93,7 +93,8 @@ async function onSearch(e) {
 
   newsApiService.resetPage();
 
-  await newsApiService.fetchArticles().then(images => {
+  newsApiService.fetchArticles().then(images => {
+    console.log(images.totalHits);
     if (newsApiService.query === '') {
       return Notify.failure('You need enter your query!');
     } else {
@@ -107,7 +108,13 @@ async function onSearch(e) {
     } else {
       clearArticlesContainer();
       generateMarkup(images.hits);
+      // refs.loadMoreBtn.style.display = 'block';
+    }
+
+    if (images.totalHits >= 40) {
       refs.loadMoreBtn.style.display = 'block';
+    } else {
+      refs.loadMoreBtn.style.display = 'none';
     }
   });
 }
@@ -119,8 +126,8 @@ async function onLoadMore() {
   await newsApiService.fetchArticles().then(images => {
     generateMarkup(images.hits);
     let pagesCount = Math.ceil(images.totalHits / perPage);
-    console.log(pagesCount);
-    if (pagesCount === pageCounter) {
+
+    if (pagesCount === pageCounter || images.hits.length < 40) {
       Notify.failure(
         `We're sorry, but you've reached the end of search results.`
       );
